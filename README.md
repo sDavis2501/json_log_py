@@ -28,3 +28,10 @@ Renaming a standard key (e.g. `msg` → `message`) is supported via `fmt`, but o
 - Non-JSON-native values in extras (sets, bytes, custom objects) are coerced via `json.dumps`'s `default` callback. The built-in default handles `set`/`frozenset` (sorted list), `bytes`/`bytearray` (UTF-8 decoded with replacement), and `complex`; anything else falls back to `repr(obj)` so log emission never crashes. Pass `json_default=` to override.
 - Timestamps default to ISO-8601 with millisecond precision (`2024-05-01T10:00:00.123`). Pass `datefmt=` for `strftime` formatting; note the stdlib default appends bare `,123` millis which is not ISO, so this formatter overrides it.
 - `ensure_ascii` defaults to `True` (escaped Unicode). This is safer for log pipelines that assume ASCII. Set it to `False` for human-readable UTF-8 in development.
+
+## Performance
+
+The window keeps a bounded buffer, so `push` is constant time and memory does not
+grow with the length of the stream. `peak` and `trough` are linear in the window
+size, which is the trade that keeps `push` cheap.
+
